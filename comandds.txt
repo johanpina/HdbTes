@@ -1,0 +1,4 @@
+uvicorn main:app --reload
+pip install -r requirements.txt
+python3 -m venv .env
+.env\Scripts\activate
