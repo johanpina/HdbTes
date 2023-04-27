@@ -14,7 +14,7 @@ def DataBaseConnection():
         print(err)
         conn.close()
 
-def run_query(query='', data=None): 
+def run_query(query='', data=any): 
     
     conn = DataBaseConnection() 
     cursor = conn.cursor()  
