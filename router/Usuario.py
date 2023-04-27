@@ -4,19 +4,16 @@ import psycopg2
 
 from fastapi import APIRouter
 from schema.Usuario import Usuario
-from utils.db import DataBaseConnection
+from utils.db import DataBaseConnection, run_query
 
 conn = DataBaseConnection()
 
 
 user = APIRouter()
 
-cur = conn.cursor()
-
 
 @user.get("/all/")
 def listar_allUsers():
-    cur.execute("SELECT * FROM Usuario")
+    cur = run_query("SELECT * FROM Usuario")
     for data in cur:
         print(data)
-   
