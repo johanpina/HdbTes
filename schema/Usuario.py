@@ -4,8 +4,9 @@ class Usuario(BaseModel):
     id:int
     nombre: str
     apellido: str
-    cedula:int
+    cedula:str
     edad: int
     telefono: str
     email: str
     password:str
+    direccion:str
