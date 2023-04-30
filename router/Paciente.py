@@ -21,8 +21,8 @@ def listar_allUsers():
     for data in cur:
         print(data)
 
-@paciente.get('/getHistorialPaciente/')
-def listarHistorialPaciente():
+@paciente.get('/getHistorialPaciente/{idHistorial}')
+def listarHistorialPaciente(idHistorial:int):
     listaHistorialDiagnostico = []
     id = 2
 
@@ -35,7 +35,7 @@ def listarHistorialPaciente():
                    INNER JOIN familiarDesignado fd on pa.familiar_Id = fd.id
                    INNER JOIN usuario usfd on fd.usuario_Id = usfd.id
                    INNER JOIN diagnostico di on hd.diagnostico_Id = di.id
-                   where paciente_id='%s'; """% id)
+                   WHERE paciente_id='%s' AND hd.id = '%s'; """% (id, idHistorial))
 
     rows = cur.fetchall()
     

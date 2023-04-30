@@ -27,9 +27,10 @@ def listar_personalMedico():
     for data in cur:
         print(data)
 
-@personalMedico.get("/historiaClinicaPaciente/{id}")
-def listarHistoriaClinicaPaciente(id:int):
+@personalMedico.get("/historiaClinicaPaciente/{id}/{idHistorial}")
+def listarHistoriaClinicaPaciente(id:int, idHistorial:int):
     listaHistorialDiagnostico = []
+    idMedico = 1
 
     cur.execute("""SELECT uspa.nombre, uspa.apellido, uspa.cedula, uspa.edad, hd.fecha, di.descripcion, us.nombre, 
                           pm.tarjeta_profesional, pm.especialidad, pm.tipo_personal FROM historialDiagnostico hd
@@ -40,7 +41,7 @@ def listarHistoriaClinicaPaciente(id:int):
                    INNER JOIN familiarDesignado fd on pa.familiar_Id = fd.id
                    INNER JOIN usuario usfd on fd.usuario_Id = usfd.id
                    INNER JOIN diagnostico di on hd.diagnostico_Id = di.id
-                   where paciente_id='%s'; """% id)
+                   WHERE paciente_id='%s' AND medico_id = '%d' AND hd.id = '%s' ; """% (id, idMedico,idHistorial))
 
     rows = cur.fetchall()
     
