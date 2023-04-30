@@ -29,3 +29,4 @@ def actualizar_usuario(id: int, Usuario_Actualizar: Usuario):
         return {"id":id, **Usuario_Actualizar.dict()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
