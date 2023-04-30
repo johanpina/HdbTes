@@ -1,8 +1,6 @@
 import sys
 sys.path.append("..")
 import psycopg2
-#import pandas as pd
-#import openpyxl
 from fastapi import APIRouter, File
 from os import getcwd
 from schema.PersonalMedico import PersonalMedico
