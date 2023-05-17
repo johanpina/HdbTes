@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+import openpyxl
 from schema.Usuario import Usuario
 from utils.db import DataBaseConnection
 
