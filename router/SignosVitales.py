@@ -9,7 +9,6 @@ from schema.SignosVitales import SignosVitalesSchema
 
 
 signosVitales = APIRouter()
-#cur = conn.cursor()
 
 @signosVitales.get("/all/")
 def get_signosVitales():

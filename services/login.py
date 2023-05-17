@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from utils.db import DataBaseConnection, run_query
-from schema.Usuario import Usuario
+from schema.Usuario import UsuarioSchema
 import jwt
 
 security = HTTPBasic()
