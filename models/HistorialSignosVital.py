@@ -8,7 +8,7 @@ Base = declarative_base()
 
 class historialSignosVitalModel(Base):
     __tablename__ = 'historialsignovital'  #poner cuidado cuando se ponga el nombre de las talbas
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=True)
     fecha = Column(DateTime)
     valor = Column(Float)
     signo_id = Column(Integer, ForeignKey(signosVitalesModel.id))
