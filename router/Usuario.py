@@ -3,30 +3,54 @@ sys.path.append("..")
 import psycopg2
 
 from fastapi import APIRouter, HTTPException
-from schema.Usuario import Usuario
-from utils.db import DataBaseConnection, run_query
-
-conn = DataBaseConnection()
-
+from schema.Usuario import UsuarioSchema
+from utils.dbAlchemy import session
+from models.Usuario import UsuarioModel
 
 user = APIRouter()
 
 
 @user.get("/all/")
-def listar_allUsers():
-    cur = run_query("SELECT * FROM Usuario")
-    for data in cur:
-        print(data)
+def get_allUsers():
+    Usuarios = session.query(UsuarioModel).all()
+    return Usuarios
 
+@user.post("/")
+def create_usuario(usuario: UsuarioSchema):
+    new_usuario = UsuarioModel(id=usuario.id ,nombre= usuario.nombre, apellido= usuario.apellido, cedula = usuario.cedula, edad= usuario.edad, telefono = usuario.telefono, email= usuario.email, password= usuario.password, direccion = usuario.direccion)
+    result = session.add(new_usuario)
+    session.commit()
+    return result
 
-@user.post("/usuarios/{id}")
-def actualizar_usuario(id: int, Usuario_Actualizar: Usuario):
-    try:
-        cur = conn.cursor()
-        cur.execute("UPDATE Usuario SET nombre=%(nombre)s, apellido=%(apellido)s, cedula=%(cedula)s, edad=%(edad)s, telefono=%(telefono)s, email=%(email)s, direccion=%(direccion)s WHERE id = %(id)s", {"id":Usuario_Actualizar.id,"nombre":Usuario_Actualizar.nombre, "apellido":Usuario_Actualizar.apellido, "cedula":Usuario_Actualizar.cedula, "edad": Usuario_Actualizar.edad, "telefono": Usuario_Actualizar.telefono, "email":Usuario_Actualizar.email, "direccion":Usuario_Actualizar.direccion})
-        conn.commit()
-        conn.close()
-        return {"id":id, **Usuario_Actualizar.dict()}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@user.put("/")
+def update_usuario(usuario: UsuarioSchema):
+    usuarioac = session.query(UsuarioModel).filter_by(id = usuario.id).first()
 
+    if usuarioac:
+
+        usuarioac.nombre = usuario.nombre
+        usuarioac.apellido = usuario.apellido
+        usuarioac.cedula = usuario.cedula
+        usuarioac.edad = usuario.edad
+        usuarioac.telefono = usuario.telefono
+        usuarioac.email = usuario.email
+        usuarioac.password = usuario.password
+        usuarioac.direccion = usuario.direccion
+
+        session.commit()
+        print("Registro Actualizado exitosamente")
+    
+    else:
+        print("No se encontro el registro con el ID proporcionado.")
+
+@user.delete("/")
+def delete_usuario(idregistro: int):
+    usuario = session.query(UsuarioModel).filter_by(id = idregistro).first()
+
+    if usuario:
+        session.delete(usuario)
+        session.commit()
+        print("Registro eliminado exitosamente")
+    
+    else:
+        print("No se encontro el registro con el ID proporcionado")

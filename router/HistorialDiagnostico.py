@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from schema.Usuario import Usuario
+from schema.Usuario import UsuarioSchema
 from utils.db import DataBaseConnection
 
 conn = DataBaseConnection()

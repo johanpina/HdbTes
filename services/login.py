@@ -1,28 +1,29 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from utils.db import DataBaseConnection, run_query
-from schema.Usuario import Usuario
+from schema.Usuario import UsuarioSchema
+from models.Usuario import UsuarioModel
+from utils.dbAlchemy import session
 import jwt
 
 security = HTTPBasic()
 login = APIRouter()
 
 
-def crear_token(Usuario):
-    logeado = {"cedula": Usuario['cedula']}
-    token = jwt.encode(logeado, Usuario['password'], algorithm="HS256")
-    return token
+def crear_token(usuario: UsuarioSchema):
+    logeado = {"cedula": usuario.cedula}
+    token = jwt.encode(logeado, usuario.password, algorithm="HS256")
+    return usuario, token
 
 
 
 @login.get("/")
-def logeo(cedula, password):
-    cur= run_query("SELECT * FROM Usuario WHERE Cedula = %(valor)s", {"valor":cedula})
-    for data in cur:
-        user = data
-    if not user or not user['password'] == password:
+def logeo(cedulausuario, passwordusuario):
+    usuarioac = session.query(UsuarioModel).filter_by(cedula = cedulausuario).first()
+
+    if usuarioac and usuarioac.password == passwordusuario:
+        token = crear_token(usuarioac)
+    else: 
         raise HTTPException(status_code=400, detail="Usuario o contraseña incorrectos, verificar datos")
-    else:
-        token = crear_token(user)
 
     return {"Acess token": token}

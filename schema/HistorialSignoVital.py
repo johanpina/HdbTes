@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 
-class HistorialSignoVital(BaseModel):
+class historialSignoVitalSchema(BaseModel):
     id:int
     fecha: datetime
     valor: float
