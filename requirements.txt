@@ -4,3 +4,5 @@ uvicorn[standard]
 pydantic
 PyJWT
 cryptography
+SQLAlchemy
+reportlab

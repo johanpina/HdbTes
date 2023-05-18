@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 
-class HistorialCuidados(BaseModel):
+class HistorialCuidadosSchema(BaseModel):
     id:int
     fecha_inicial: datetime
     fecha_final: datetime
