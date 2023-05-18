@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 import openpyxl
-from schema.Usuario import Usuario
+from schema.Usuario import UsuarioSchema
 from utils.db import DataBaseConnection
 
 conn = DataBaseConnection()

@@ -9,6 +9,7 @@ def DataBaseConnection():
                                             database="HospitalizacionenCasa",
                                             user="postgres",
                                             password="123")
+
         return conn
     except psycopg2.OperationalError as err:
         print(err)
