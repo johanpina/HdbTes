@@ -1,5 +1,7 @@
 from sqlalchemy import Table, Column, Integer, String,DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
+from models.Paciente import PacienteModel
+from models.PersonalMedico import PersonalMedicoModel
 #from utils.dbAlchemy import meta, engine
 from sqlalchemy.orm import sessionmaker
 
@@ -11,8 +13,8 @@ class historialCuidadosModel(Base):
     fecha_inicial = Column(DateTime)
     fecha_final = Column(DateTime)
     cuidado = Column(String)
-    medico_id = Column(Integer, ForeignKey("personalmedico.id"))
-    paciente_id = Column(Integer, ForeignKey("paciente.id"))
+    medico_id = Column(Integer, ForeignKey(PersonalMedicoModel.id))
+    paciente_id = Column(Integer, ForeignKey(PacienteModel.id))
     descripcion = Column(String)
     
 

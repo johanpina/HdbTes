@@ -19,7 +19,8 @@ app.include_router(historialDiagnostico, prefix='/historialDiagnostico')
 app.include_router(paciente, prefix='/paciente')
 app.include_router(familiarDesignado, prefix='/familiarDesignado')
 app.include_router(login, prefix='/login')
-app.include_router(historialCuidados, prefix='/cuidados')
+app.include_router(historialCuidados, prefix='/historialCuidados')
+
 
 @app.get("/")
 def hello_world():

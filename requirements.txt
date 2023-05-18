@@ -5,3 +5,4 @@ pydantic
 PyJWT
 cryptography
 SQLAlchemy
+reportlab
