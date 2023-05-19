@@ -1,8 +1,13 @@
 from pydantic import BaseModel
 
-class PersonalACargoSchema(BaseModel):
-    id: int
+class PersonalACargoBase(BaseModel):
     medico_id:int
     paciente_id: int
     paciente_activo: bool
+
+class PersonalACargoSchema(PersonalACargoBase):
+    id: int
+
+    class Config:
+        orm_mode: True
     
