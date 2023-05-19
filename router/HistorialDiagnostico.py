@@ -1,18 +1,17 @@
 from fastapi import APIRouter
-import openpyxl
-from schema.Usuario import UsuarioSchema
 from utils.db import DataBaseConnection
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from pathlib import Path
+from fastapi.responses import FileResponse
 
 conn = DataBaseConnection()
 historialDiagnostico = APIRouter()
 cur = conn.cursor()
 
 
-@historialDiagnostico.get("/all/{id}")
-def listar_diagnostico(id:int):
-    listaHistorialDiagnostico = []
-     # Obtener los datos de la base de datos
-                
+@historialDiagnostico.get("/listar_diagnosticos/")
+def listar_diagnostico(id:int):                
     cur.execute("""SELECT hd.fecha, us.nombre, us.apellido, pm.tarjeta_profesional, pm.especialidad, pm.tipo_personal,
                           uspa.nombre, usfd.nombre, di.nombre_diagnostico, di.descripcion FROM historialDiagnostico hd
                    INNER JOIN personalMedico pm on hd.medico_Id = pm.id 
@@ -25,42 +24,33 @@ def listar_diagnostico(id:int):
                    where paciente_id='%s'; """% id)
     rows = cur.fetchall()
 
-    # Crear un nuevo archivo Excel
-    wb = openpyxl.Workbook()
+    pdf_canvas = canvas.Canvas("historial_clinico.pdf", pagesize=letter)
 
-    # Agregar los datos a una hoja de cálculo
-    sheet = wb.active
-    sheet.title = "Historial de Diagnósticos"
+    x = 40
+    y = 690
 
-    # Agregar encabezados a la tabla
-    sheet.append(["fecha", "usuario_nombre", "usuario_apellido", "tarjeta_profesinoal", "especialidad", "tipo_personal",
-                  "usuario_paciente", "usuario_familiar", "nombre_diagnostico", "diagnostico_descripcion"])
+    pdf_canvas.setFont('Helvetica-Bold', 16)
+    pdf_canvas.drawString(x*6, 750, "Clinica CodeLabs")
+    pdf_canvas.setFont('Helvetica', 12)
+    pdf_canvas.drawString(x*4.5, 735, "Dirección: Calle 65 No 26 - 10, Manizales Caldas")
+    pdf_canvas.drawString(x*6, 720, "Teléfono: 8000-512120")
+    pdf_canvas.line(36,710,576,710)
 
-    # Agregar filas a la tabla
-    for row in rows:
-        sheet.append(row)
+    for tupla in rows:
+        pdf_canvas.drawString(x, y, "Nombre Paciente: " + str(tupla[0]))
+        pdf_canvas.drawString(x, y-20, "Apellido Paciente: "+ str(tupla[1]))
+        pdf_canvas.drawString(x, y-40, "Cedula: "+ str(tupla[2]))
+        pdf_canvas.drawString(x, y-60, "Edad: " + str(tupla[3]))
+        pdf_canvas.drawString(x, y-80, "Fecha: " + str(tupla[4]))
+        pdf_canvas.drawString(x, y-100, "Motivo de consulta: " + tupla[5])
+        pdf_canvas.drawString(x, y-120, "Doctor: " + tupla[6])
+        pdf_canvas.drawString(x, y-140, "Tarjeta profesional: " + str(tupla[7]))
+        pdf_canvas.drawString(x, y-160, "Especialidad: " + tupla[8])
+        pdf_canvas.drawString(x, y-180, "Tipo de personal médico: " + tupla[9])
+        y -= 220
 
-    # Guardar el archivo Excel
-    wb.save("resultados.xlsx")
-
-    for data in rows:
-        listaHistorialDiagnostico.append(data)
-    return  {"message": listaHistorialDiagnostico}
-
-
-def html_styler(html, styles):
-    """Aplica estilos CSS a una tabla HTML"""
-    from bs4 import BeautifulSoup
-
-    soup = BeautifulSoup(html, "html.parser")
-    for style in styles:
-        selector = style["selector"]
-        props = style["props"]
-        for tag in soup.select(selector):
-            for prop in props:
-                tag[prop[0]] = prop[1]
-    return str(soup.table)
-
-def obtenerHistorialClinica():
-    pass
-    
+    pdf_canvas.save()
+    pdf_name = "historial_clinico.pdf"
+    pdf_path = Path.cwd() / pdf_name
+    headers = {"Content-Disposition": f"attachment; filename={pdf_name}"}
+    return FileResponse(pdf_path, headers=headers, media_type="application/pdf")
