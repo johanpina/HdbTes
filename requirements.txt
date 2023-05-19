@@ -6,3 +6,5 @@ PyJWT
 cryptography
 SQLAlchemy
 reportlab
+requests
+psycopg2

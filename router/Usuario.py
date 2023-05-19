@@ -42,6 +42,9 @@ def update_usuario(usuario: UsuarioSchema):
     
     else:
         print("No se encontro el registro con el ID proporcionado.")
+    print(usuarioac.nombre)
+    return usuarioac
+    
 
 @user.delete("/")
 def delete_usuario(idregistro: int):

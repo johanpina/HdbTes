@@ -26,4 +26,4 @@ def logeo(cedulausuario, passwordusuario):
     else: 
         raise HTTPException(status_code=400, detail="Usuario o contraseña incorrectos, verificar datos")
 
-    return {"Acess token": token}
+    return {"auth": token}

@@ -1,8 +1,9 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
 class historialSignoVitalSchema(BaseModel):
-    id:int
+    id:Optional[int]
     fecha: datetime
     valor: float
     signo_id:int
