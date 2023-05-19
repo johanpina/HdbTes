@@ -13,3 +13,4 @@ class PersonalMedicoModel(Base):
     tarjeta_profesional = Column(String)
     especialidad = Column(String)
     tipo_personal = Column(String)
+

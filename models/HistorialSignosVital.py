@@ -1,6 +1,8 @@
 from sqlalchemy import Table, Column, Integer, String,DateTime, ForeignKey, Float
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
+from models.Paciente import PacienteModel
+from models.SignosVitales import signosVitalesModel
 
 Base = declarative_base()
 
@@ -9,9 +11,8 @@ class historialSignosVitalModel(Base):
     id = Column(Integer, primary_key=True)
     fecha = Column(DateTime)
     valor = Column(Float)
-    signo_id = Column(Integer, ForeignKey("signosvitales.id"))
-    paciente_id = Column(Integer, ForeignKey("paciente.id"))
-    
+    signo_id = Column(Integer, ForeignKey(signosVitalesModel.id))
+    paciente_id = Column(Integer, ForeignKey(PacienteModel.id))
 
 
 
