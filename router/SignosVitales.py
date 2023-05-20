@@ -3,28 +3,30 @@ sys.path.append("..")
 
 from fastapi import APIRouter, HTTPException
 from utils.dbAlchemy import session
-from models.SignosVitales import signosVitalesModel
-from schema.SignosVitales import SignosVitalesSchema
+from models.model import signosVitalesModel
+from schema.SignosVitales import SignosVitalesSchema, SignosVitalesBase
+from typing import List
 
 
 
 signosVitales = APIRouter()
 
-@signosVitales.get("/all/")
+@signosVitales.get("/all/", response_model=List[SignosVitalesSchema])
 def get_signosVitales():
     Signos = session.query(signosVitalesModel).all()
     return Signos
 
-@signosVitales.post("/")
-def create_signosVitales(signosVitales: SignosVitalesSchema):
-    new_signoVital = signosVitalesModel(id=signosVitales.id ,nombre_signo= signosVitales.nombre_signo, unidad= signosVitales.unidad)
-    result = session.add(new_signoVital)
+@signosVitales.post("/", response_model=SignosVitalesSchema)
+def create_signosVitales(signosVitales: SignosVitalesBase):
+    db_signo = signosVitalesModel(**signosVitales.dict())
+    session.add(db_signo)
     session.commit()
-    return result
+    session.refresh(db_signo)
+    return db_signo
 
-@signosVitales.put("/")
+@signosVitales.put("/", response_model=SignosVitalesSchema)
 def update_signosVitales(signosVitales: SignosVitalesSchema):
-    signovital = session.query(signosVitalesModel).filter_by(id = signosVitales.id).first()
+    signovital = session.query(signosVitalesModel).filter_by(id = signosVitales.id).one()
 
     if signovital:
 
@@ -34,16 +36,18 @@ def update_signosVitales(signosVitales: SignosVitalesSchema):
         print("Registro Actualizado exitosamente")
     
     else:
-        print("No se encontro el registro con el ID proporcionado.")
+        raise HTTPException(status_code=404, detail="Signo Vital no encontrado")
+    
+    return signovital
 
 @signosVitales.delete("/")
 def delete_signoVital(idregistro: int):
-    signovital = session.query(signosVitalesModel).filter_by(id = idregistro).first()
+    signovital = session.query(signosVitalesModel).filter(signosVitalesModel.id == idregistro).one()
 
     if signovital:
         session.delete(signovital)
         session.commit()
         print("Registro eliminado exitosamente")
-    
+        return {"mensaje": "Signo Vital Eliminado"}
     else:
-        print("No se encontro el registro con el ID proporcionado")
+        raise HTTPException(status_code=404, detail="Signo Vital no encontrado")

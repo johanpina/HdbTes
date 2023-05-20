@@ -1,44 +1,35 @@
 import sys
 sys.path.append("..")
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from utils.db import DataBaseConnection, run_query
 #from utils.dbAlchemy import conn
 
 #--------
 from utils.dbAlchemy import session
-from models.HistorialCuidados import historialCuidadosModel
-from models.Paciente import PacienteModel
-from models.Usuario import UsuarioModel
-from models.notificaciones import notificacionesModel
-from models.FamiliarDesignado import FamiliarDesignadoModel
-from models.HistorialCuidados import historialCuidadosModel
-from schema.HistorialCuidados import HistorialCuidadosSchema
+from models.model import historialCuidadosModel,PacienteModel,UsuarioModel, notificacionesModel, FamiliarDesignadoModel
+from schema.HistorialCuidados import HistorialCuidadosSchema, HistorialCuidadosBase
 from sqlalchemy import func, select
 from services import notificaciones
 import threading 
+from typing import List
 
 
 historialCuidados = APIRouter()
 #cur = conn.cursor()
 
-@historialCuidados.get("/all/")
+@historialCuidados.get("/all/", response_model=List[HistorialCuidadosSchema])
 def get_historialCuidados():
     historiales = session.query(historialCuidadosModel).all()
     return historiales
 
-@historialCuidados.post("/")
-def create_historial_cuidados(historialCuidados: HistorialCuidadosSchema):
-    new_historial_Cuidado = historialCuidadosModel(  id = historialCuidados.id,
-                                                     fecha_inicial=historialCuidados.fecha_inicial, 
-                                                     fecha_final=historialCuidados.fecha_final,
-                                                     cuidado=historialCuidados.cuidado,
-                                                     medico_id=historialCuidados.medico_id,
-                                                     paciente_id=historialCuidados.paciente_id,
-                                                     descripcion=historialCuidados.descripcion)
-    result = session.add(new_historial_Cuidado)
-    session.commit()
 
-    return result
+@historialCuidados.post("/", response_model=HistorialCuidadosSchema)
+def create_historial_cuidados(historialCuidados: HistorialCuidadosBase):
+    db_historial_Cuidado = historialCuidadosModel(**historialCuidados.dict())
+    session.add(db_historial_Cuidado)
+    session.commit()
+    session.refresh(db_historial_Cuidado)
+    return db_historial_Cuidado
 
 @historialCuidados.get("/send_email/")
 def send_email(id:int):
@@ -61,9 +52,9 @@ def send_email(id:int):
     for hilo in hilos:
         hilo.join()
 
-@historialCuidados.put("/")
+@historialCuidados.put("/", response_model=HistorialCuidadosSchema)
 def update_historial_Cuidados(historialCuidados: HistorialCuidadosSchema):
-    historialCuidado = session.query(historialCuidadosModel).filter_by(id = historialCuidados.id).first()
+    historialCuidado = session.query(historialCuidadosModel).filter_by(id = historialCuidados.id).one()
 
     if historialCuidado:
         historialCuidado.fecha_inicial = historialCuidados.fecha_inicial
@@ -76,18 +67,20 @@ def update_historial_Cuidados(historialCuidados: HistorialCuidadosSchema):
         print("Registro Actualizado exitosamente")
     
     else:
-        print("No se encontro el registro con el ID proporcionado")
+        raise HTTPException(status_code=404, detail="historial de signo vital no encontrado")
+    
+    return historialCuidado
+
 
 @historialCuidados.delete("/")
 def delete_historial_cuidado(idregistro: int):
-    historialCuidado = session.query(historialCuidadosModel).filter_by(id = idregistro).first()
+    historialCuidado = session.query(historialCuidadosModel).filter(historialCuidadosModel.id== idregistro).one()
 
     if historialCuidado:
         session.delete(historialCuidado)
         session.commit()
-        print("Registro eliminado exitosamente")
+        return {"mensaje": "historial cuidado Eliminado"}
     
     else:
-        print("No se encontro el registro con el ID proporcionado")
+        raise HTTPException(status_code=404, detail="historial cuidado no encontrado")
 
-# conn.execute(historialCuidados.select()).fetchall()

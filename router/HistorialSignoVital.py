@@ -5,28 +5,30 @@ from fastapi import APIRouter, HTTPException
 from utils.db import DataBaseConnection, run_query
 
 from utils.dbAlchemy import session
-from models.HistorialSignosVital import historialSignosVitalModel
-from schema.HistorialSignoVital import historialSignoVitalSchema
+from models.model import historialSignosVitalModel
+from schema.HistorialSignoVital import historialSignoVitalSchema, historialSignoVitalBase
+from typing import List
 
 
 
 historialSignosVital = APIRouter()
 
-@historialSignosVital.get("/all/")
+@historialSignosVital.get("/all/", response_model=List[historialSignoVitalSchema])
 def get_historialSignosVitales():
     historialSignos = session.query(historialSignosVitalModel).all()
     return historialSignos
 
-@historialSignosVital.post("/")
-def create_historialSignosVitales(historialSignosVitales: historialSignoVitalSchema):
-    new_historialSignoVital = historialSignosVitalModel(id=historialSignosVitales.id ,fecha= historialSignosVitales.fecha, valor= historialSignosVitales.valor, signo_id= historialSignosVitales.signo_id, paciente_id= historialSignosVitales.paciente_id)
-    result = session.add(new_historialSignoVital)
+@historialSignosVital.post("/", response_model=historialSignoVitalSchema)
+def create_historialSignosVitales(historialSignosVitales: historialSignoVitalBase):
+    db_historialSignoVital = historialSignosVitalModel(**historialSignosVitales.dict())
+    session.add(db_historialSignoVital)
     session.commit()
-    return result
+    session.refresh(db_historialSignoVital)
+    return db_historialSignoVital
 
-@historialSignosVital.put("/")
+@historialSignosVital.put("/", response_model=historialSignoVitalSchema)
 def update_historialSignosVitales(historialSignosVitales: historialSignoVitalSchema):
-    historialsignovital = session.query(historialSignosVitalModel).filter_by(id = historialSignosVitales.id).first()
+    historialsignovital = session.query(historialSignosVitalModel).filter_by(id = historialSignosVitales.id).one()
 
     if historialsignovital:
 
@@ -38,16 +40,19 @@ def update_historialSignosVitales(historialSignosVitales: historialSignoVitalSch
         print("Registro Actualizado exitosamente")
     
     else:
-        print("No se encontro el registro con el ID proporcionado.")
+        raise HTTPException(status_code=404, detail="historial de signo vital no encontrado")
+    
+    return historialsignovital
+
 
 @historialSignosVital.delete("/")
 def delete_historialSignoVital(idregistro: int):
-    historialsignovital = session.query(historialSignosVitalModel).filter_by(id = idregistro).first()
+    historialsignovital = session.query(historialSignosVitalModel).filter(historialSignosVitalModel.id == idregistro).first()
 
     if historialsignovital:
         session.delete(historialsignovital)
         session.commit()
-        print("Registro eliminado exitosamente")
+        return {"mensaje": "historial signo vital Eliminado"}
     
     else:
-        print("No se encontro el registro con el ID proporcionado")
+        raise HTTPException(status_code=404, detail="historial signo vital no encontrado")

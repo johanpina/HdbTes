@@ -5,26 +5,28 @@ import psycopg2
 from fastapi import APIRouter, HTTPException
 from schema.Usuario import UsuarioSchema
 from utils.dbAlchemy import session
-from models.Usuario import UsuarioModel
+from models.model import UsuarioModel
+from schema.Usuario import UsuarioSchema,UsuarioBase
+from typing import List
 
 user = APIRouter()
 
+@user.get("/all/", response_model=List[UsuarioSchema])
+async def get_allUsers():
+    usuarios = session.query(UsuarioModel).all()
+    return usuarios
 
-@user.get("/all/")
-def get_allUsers():
-    Usuarios = session.query(UsuarioModel).all()
-    return Usuarios
-
-@user.post("/")
-def create_usuario(usuario: UsuarioSchema):
-    new_usuario = UsuarioModel(id=usuario.id ,nombre= usuario.nombre, apellido= usuario.apellido, cedula = usuario.cedula, edad= usuario.edad, telefono = usuario.telefono, email= usuario.email, password= usuario.password, direccion = usuario.direccion)
-    result = session.add(new_usuario)
+@user.post("/", response_model=UsuarioSchema)
+async def create_usuario(usuario: UsuarioBase):
+    db_usuario = UsuarioModel(**usuario.dict())
+    session.add(db_usuario)
     session.commit()
-    return result
+    session.refresh(db_usuario)
+    return db_usuario
 
-@user.put("/")
-def update_usuario(usuario: UsuarioSchema):
-    usuarioac = session.query(UsuarioModel).filter_by(id = usuario.id).first()
+@user.put("/", response_model=UsuarioSchema)
+async def update_usuario(usuario: UsuarioSchema):
+    usuarioac = session.query(UsuarioModel).filter_by(id = usuario.id).one()
 
     if usuarioac:
 
@@ -41,19 +43,21 @@ def update_usuario(usuario: UsuarioSchema):
         print("Registro Actualizado exitosamente")
     
     else:
-        print("No se encontro el registro con el ID proporcionado.")
-    print(usuarioac.nombre)
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return usuarioac
     
 
 @user.delete("/")
 def delete_usuario(idregistro: int):
-    usuario = session.query(UsuarioModel).filter_by(id = idregistro).first()
+    usuario = session.query(UsuarioModel).filter(UsuarioModel.id == idregistro).one()
 
     if usuario:
         session.delete(usuario)
         session.commit()
         print("Registro eliminado exitosamente")
-    
+        return {"mensaje": "Usuario Eliminado"}
     else:
-        print("No se encontro el registro con el ID proporcionado")
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+
+    

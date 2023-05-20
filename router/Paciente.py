@@ -1,34 +1,25 @@
 import sys
 sys.path.append("..")
 import psycopg2
-from fastapi import APIRouter, File
-from os import getcwd
-from schema.PersonalMedico import PersonalMedico
-from utils.db import DataBaseConnection
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from pathlib import Path
+from fastapi import APIRouter
 from utils.dbAlchemy import session
-from models.FamiliarDesignado import FamiliarDesignadoModel
-from models.Paciente import PacienteModel
-from models.Usuario import UsuarioModel
+from models.model import PacienteModel
+from utils.dbAlchemy import session
+from typing import List
+from schema.Paciente import PacienteSchema
+from models.model import PacienteModel, UsuarioModel, FamiliarDesignadoModel
+from schema.Usuario import UsuarioSchema
 
-conn = DataBaseConnection()
 paciente = APIRouter()
-cur = conn.cursor()
 
-@paciente.get("/all/")
-def listar_allUsers():
-    cur.execute("SELECT * FROM paciente")
-    for data in cur:
-        print(data)
+@paciente.get("/all/", response_model=List[PacienteSchema])
+async def listar_pacientes():
+    pacientes = session.query(PacienteModel).all()
+    return pacientes
 
-
-@paciente.get("/pacientesporfamiliar")
+@paciente.get("/pacientesporfamiliar", response_model=List[UsuarioSchema])
 def listar_pacientesporfamiliar(idfamiliar: int):
-    PacientesAcargo = session.query(FamiliarDesignadoModel, PacienteModel, UsuarioModel).join(PacienteModel, FamiliarDesignadoModel.id== PacienteModel.familiar_id).join(UsuarioModel, PacienteModel.usuario_id == UsuarioModel.id).filter(FamiliarDesignadoModel.id == idfamiliar).all()
+    PacientesAcargo = session.query(FamiliarDesignadoModel, PacienteModel, UsuarioModel).join(PacienteModel, FamiliarDesignadoModel.id== PacienteModel.familiar_id).join(UsuarioModel, PacienteModel.usuario_id == UsuarioModel.id).filter(FamiliarDesignadoModel.usuario_id == idfamiliar).all()
     resultado_json = []
     for item in PacientesAcargo:
         tabla_data = item[2].__dict__

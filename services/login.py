@@ -2,12 +2,10 @@ from fastapi import APIRouter, HTTPException
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from utils.db import DataBaseConnection, run_query
 from schema.Usuario import UsuarioSchema
-from models.Usuario import UsuarioModel
+from models.model import UsuarioModel, PersonalMedicoModel, FamiliarDesignadoModel, PacienteModel
 from utils.dbAlchemy import session
 import jwt
-from models.PersonalMedico import PersonalMedicoModel
-from models.FamiliarDesignado import FamiliarDesignadoModel
-from models.Paciente import PacienteModel
+
 
 security = HTTPBasic()
 login = APIRouter()
@@ -23,7 +21,6 @@ def crear_token(usuario: UsuarioSchema):
 @login.get("/")
 def logeo(cedulausuario, passwordusuario):
     usuarioac = session.query(UsuarioModel).filter_by(cedula = cedulausuario).first()
-    id = usuarioac.id
     rol=[]
     if usuarioac and usuarioac.password == passwordusuario:
         token = crear_token(usuarioac)
@@ -31,9 +28,9 @@ def logeo(cedulausuario, passwordusuario):
         raise HTTPException(status_code=400, detail="Usuario o contraseña incorrectos, verificar datos")
     
     print(usuarioac.id)
-    doctor = session.query(PersonalMedicoModel).filter(PersonalMedicoModel.usuario_id == id).first()
-    familiar = session.query(FamiliarDesignadoModel).filter(FamiliarDesignadoModel.usuario_id == id).first()
-    paciente = session.query(PacienteModel).filter(PacienteModel.usuario_id == id).first()
+    doctor = usuarioac.personalmedico
+    familiar = usuarioac.familiardesignado
+    paciente = usuarioac.paciente
 
 
     if doctor:

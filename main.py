@@ -11,8 +11,11 @@ from router.SignosVitales import signosVitales
 from router.HistorialSignoVital import historialSignosVital
 from router.PersonalACargo import personalAcargo
 from fastapi.middleware.cors import CORSMiddleware
+from utils.dbAlchemy import Base, engine
 
 app = FastAPI()
+
+Base.metadata.create_all(bind=engine)
 
 origins = [
     "http://localhost:5173",
