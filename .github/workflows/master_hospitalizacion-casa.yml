@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'Hospitalizacion-Casa'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0C5143BA3B5B4FDBBF0F9BCC216FA9B1 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B4714DFABAFF4FCAB76505C4851EF048 }}
