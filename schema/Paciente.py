@@ -1,6 +1,11 @@
 from pydantic import BaseModel
 
-class Paciente(BaseModel):
-    id: int
+class PacienteBase(BaseModel):
     familiar_id:int
     usuario_id:int
+
+class PacienteSchema(PacienteBase):
+    id: int
+
+    class Config:
+        orm_mode = True

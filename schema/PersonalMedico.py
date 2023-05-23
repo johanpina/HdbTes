@@ -1,9 +1,14 @@
 from pydantic import BaseModel
 
-class PersonalMedico(BaseModel):
-    id: int
+class PersonalMedicoBase(BaseModel):
     usuario_id:int
-    tarjetaProfesional: str
+    tarjeta_profesional: str
     especialidad: str
     tipo_personal: str
-    
+
+class PersonalMedicoSchema(PersonalMedicoBase):
+    id: int
+
+
+    class Config:
+        orm_mode = True

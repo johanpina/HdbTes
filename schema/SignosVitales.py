@@ -1,6 +1,11 @@
 from pydantic import BaseModel
 
-class SignosVitalesSchema(BaseModel):
-    id:int
+class SignosVitalesBase(BaseModel):
     nombre_signo: str
     unidad: str
+
+class SignosVitalesSchema(SignosVitalesBase):
+    id:int
+
+    class Config:
+        orm_mode = True

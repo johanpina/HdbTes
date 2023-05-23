@@ -1,27 +1,19 @@
 import sys
 sys.path.append("..")
-import psycopg2
-from fastapi import APIRouter, File
-from os import getcwd
-from schema.PersonalMedico import PersonalMedico
+from fastapi import APIRouter, Depends
 from utils.db import DataBaseConnection
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from pathlib import Path
+from utils.dbAlchemy import session
+from schema.PersonalMedico import PersonalMedicoSchema, PersonalMedicoBase
+from sqlalchemy.orm import Session
+from typing import List
+from models.model import PersonalMedicoModel
 
 
 
-conn = DataBaseConnection()
+
 personalMedico = APIRouter()
-cur = conn.cursor()
 
-
-@personalMedico.get("/all/")
-def listar_personalMedico():
-    print("jenicjen")
-    cur.execute("SELECT * FROM personalMedico")
-    for data in cur:
-        print(data)
-
+@personalMedico.get("/all/", response_model=List[PersonalMedicoSchema])
+async def listar_personalmedico():
+    medicos = session.query(PersonalMedicoModel).all()
+    return medicos

@@ -3,28 +3,31 @@ sys.path.append("..")
 import psycopg2
 
 from fastapi import APIRouter, HTTPException
-from schema.PersonalACargo import PersonalACargoSchema
+from schema.PersonalACargo import PersonalACargoSchema, PersonalACargoBase
 from utils.dbAlchemy import session
-from models.PersonalACargo import PersonalACargoModel
-from models.Paciente import PacienteModel
-from models.Usuario import UsuarioModel
+from models.model import PersonalACargoModel, PacienteModel, UsuarioModel, PersonalMedicoModel
+from typing import List
+
 
 personalAcargo = APIRouter()
 
 
-@personalAcargo.get("/all/")
+@personalAcargo.get("/all/", response_model=List[PersonalACargoSchema])
 def get_allPersonalAcargo():
     PersonalesACargo = session.query(PersonalACargoModel).all()
     return PersonalesACargo
 
-@personalAcargo.post("/")
-def create_PersonalAcargo(personalAcargo: PersonalACargoSchema):
-    new_personalAcargo = PersonalACargoModel(id=personalAcargo.id ,medico_id= personalAcargo.medico_id, paciente_id= personalAcargo.paciente_id, paciente_activo = personalAcargo.paciente_activo)
-    result = session.add(new_personalAcargo)
-    session.commit()
-    return result
 
-@personalAcargo.put("/")
+@personalAcargo.post("/", response_model=PersonalACargoSchema)
+def create_PersonalAcargo(personalAcargo: PersonalACargoBase):
+    db_personalacargo = PersonalACargoModel(**personalAcargo.dict())
+    session.add(db_personalacargo)
+    session.commit()
+    session.refresh(db_personalacargo)
+    return db_personalacargo
+
+
+@personalAcargo.put("/", response_model=PersonalACargoSchema)
 def update_PersonalAcargo(personalAcargo: PersonalACargoSchema):
     personalac = session.query(PersonalACargoModel).filter_by(id = personalAcargo.id).first()
 
@@ -38,23 +41,24 @@ def update_PersonalAcargo(personalAcargo: PersonalACargoSchema):
         print("Registro Actualizado exitosamente")
     
     else:
-        print("No se encontro el registro con el ID proporcionado.")
+        raise HTTPException(status_code=404, detail="Personal A cargo no encontrado")
+    
+    return personalac
 
 @personalAcargo.delete("/")
 def delete_personalAcargo(idregistro: int):
-    personal = session.query(PersonalACargoModel).filter_by(id = idregistro).first()
+    personal = session.query(PersonalACargoModel).filter(PersonalACargoModel.id == idregistro).first()
 
     if personal:
         session.delete(personal)
         session.commit()
-        print("Registro eliminado exitosamente")
-    
+        return {"mensaje": "Signo Vital Eliminado"}
     else:
-        print("No se encontro el registro con el ID proporcionado")
+        raise HTTPException(status_code=404, detail="Personal a Cargo no encontrado")
 
-@personalAcargo.get("/pacientes")
+@personalAcargo.get("/pacientes", response_model=List[PersonalACargoSchema])
 def get_allPersonalAcargo(idmedico: int):
-    PersonalesACargo = session.query(PersonalACargoModel, PacienteModel, UsuarioModel).join(PacienteModel, PersonalACargoModel.paciente_id== PacienteModel.id).join(UsuarioModel, PacienteModel.usuario_id == UsuarioModel.id).filter(PersonalACargoModel.medico_id == idmedico).all()
+    PersonalesACargo = session.query(PersonalACargoModel, PacienteModel, UsuarioModel, PersonalMedicoModel).join(PacienteModel, PersonalACargoModel.paciente_id== PacienteModel.id).join(UsuarioModel, PacienteModel.usuario_id == UsuarioModel.id).join(PersonalMedicoModel, PersonalMedicoModel.id == PersonalACargoModel.id).filter(PersonalMedicoModel.usuario_id == idmedico).all()
     resultado_json = []
     for item in PersonalesACargo:
         tabla_data = item[2].__dict__
