@@ -17,3 +17,8 @@ personalMedico = APIRouter()
 async def listar_personalmedico():
     medicos = session.query(PersonalMedicoModel).all()
     return medicos
+
+@personalMedico.get("/{id}", response_model=PersonalMedicoSchema)
+async def obtenerMedicoPorUsuario(id: int):
+    medico = session.query(PersonalMedicoModel).filter_by(usuario_id=id).first()
+    return medico
