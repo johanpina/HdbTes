@@ -4,6 +4,8 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from pathlib import Path
 from fastapi.responses import FileResponse
+from models.model import PacienteModel
+from utils.dbAlchemy import session
 
 conn = DataBaseConnection()
 historialDiagnostico = APIRouter()
@@ -11,9 +13,10 @@ cur = conn.cursor()
 
 
 @historialDiagnostico.get("/listar_diagnosticos/")
-def listar_diagnostico(id:int):                
-    cur.execute("""SELECT hd.fecha, us.nombre, us.apellido, pm.tarjeta_profesional, pm.especialidad, pm.tipo_personal,
-                          uspa.nombre, usfd.nombre, di.nombre_diagnostico, di.descripcion FROM historialDiagnostico hd
+def listar_diagnostico(id:int):      
+    paciente = session.query(PacienteModel).filter(PacienteModel.usuario_id== id).first()       
+    cur.execute("""SELECT uspa.nombre, uspa.apellido, uspa.cedula, uspa.edad, hd.fecha, di.descripcion,
+                          us.nombre, pm.tarjeta_profesional, pm.especialidad, pm.tipo_personal FROM historialDiagnostico hd
                    INNER JOIN personalMedico pm on hd.medico_Id = pm.id 
                    INNER JOIN usuario us on pm.usuario_Id = us.id
                    INNER JOIN paciente pa on hd.paciente_Id = pa.id
@@ -21,7 +24,7 @@ def listar_diagnostico(id:int):
                    INNER JOIN familiarDesignado fd on pa.familiar_Id = fd.id
                    INNER JOIN usuario usfd on fd.usuario_Id = usfd.id
                    INNER JOIN diagnostico di on hd.diagnostico_Id = di.id
-                   where paciente_id='%s'; """% id)
+                   WHERE paciente_id = '%s'"""% paciente.id)
     rows = cur.fetchall()
 
     pdf_canvas = canvas.Canvas("historial_clinico.pdf", pagesize=letter)
