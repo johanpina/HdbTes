@@ -5,10 +5,10 @@ def DataBaseConnection():
     conn = None
     try:
         conn = psycopg2.connect(
-                                            host="localhost",
-                                            database="HospitalizacionenCasa",
-                                            user="postgres",
-                                            password="05092001")
+                                            host="backendhospitalizacionencasa-server.postgres.database.azure.com",
+                                            database="backendhospitalizacionencasa-database",
+                                            user="uctdfmdutd",
+                                            password="C2V1D7334156E6WA$")
 
         return conn
     except psycopg2.OperationalError as err:
