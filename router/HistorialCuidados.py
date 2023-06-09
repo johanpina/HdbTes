@@ -6,7 +6,7 @@ from utils.db import DataBaseConnection, run_query
 
 #--------
 from utils.dbAlchemy import session
-from models.model import historialCuidadosModel,PacienteModel,UsuarioModel, notificacionesModel, FamiliarDesignadoModel
+from models.model import historialCuidadosModel,PacienteModel,UsuarioModel, notificacionesModel, FamiliarDesignadoModel, PersonalMedicoModel
 from schema.HistorialCuidados import HistorialCuidadosSchema, HistorialCuidadosBase
 from sqlalchemy import func, select
 from services import notificaciones
@@ -84,3 +84,16 @@ def delete_historial_cuidado(idregistro: int):
     else:
         raise HTTPException(status_code=404, detail="historial cuidado no encontrado")
 
+@historialCuidados.get("/sugerencias", response_model=List[HistorialCuidadosSchema])
+def get_allPersonalAcargo(idmedico: int):
+    historiales = session.query(historialCuidadosModel, PersonalMedicoModel, UsuarioModel).join(PersonalMedicoModel, PersonalMedicoModel.id == historialCuidadosModel.medico_id).join(UsuarioModel, UsuarioModel.id == PersonalMedicoModel.usuario_id).filter(PersonalMedicoModel.usuario_id == idmedico).all()
+    resultado_json = []
+    for item in historiales:
+        tabla_data = item[0].__dict__
+        resultado_json.append({
+            key: value for key, value in tabla_data.items() if not key.startswith('_')
+        })
+
+    print(resultado_json)
+    # Retornar los resultados en formato JSON
+    return resultado_json

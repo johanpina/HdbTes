@@ -4,6 +4,7 @@ import psycopg2
 
 from fastapi import APIRouter, HTTPException
 from schema.PersonalACargo import PersonalACargoSchema, PersonalACargoBase
+from schema.Usuario import UsuarioSchema
 from utils.dbAlchemy import session
 from models.model import PersonalACargoModel, PacienteModel, UsuarioModel, PersonalMedicoModel
 from typing import List
@@ -56,9 +57,9 @@ def delete_personalAcargo(idregistro: int):
     else:
         raise HTTPException(status_code=404, detail="Personal a Cargo no encontrado")
 
-@personalAcargo.get("/pacientes", response_model=List[PersonalACargoSchema])
+@personalAcargo.get("/pacientes", response_model=List[UsuarioSchema])
 def get_allPersonalAcargo(idmedico: int):
-    PersonalesACargo = session.query(PersonalACargoModel, PacienteModel, UsuarioModel, PersonalMedicoModel).join(PacienteModel, PersonalACargoModel.paciente_id== PacienteModel.id).join(UsuarioModel, PacienteModel.usuario_id == UsuarioModel.id).join(PersonalMedicoModel, PersonalMedicoModel.id == PersonalACargoModel.id).filter(PersonalMedicoModel.usuario_id == idmedico).all()
+    PersonalesACargo = session.query(PersonalACargoModel, PacienteModel, UsuarioModel, PersonalMedicoModel).join(PacienteModel, PersonalACargoModel.paciente_id== PacienteModel.id).join(UsuarioModel, PacienteModel.usuario_id == UsuarioModel.id).join(PersonalMedicoModel, PersonalMedicoModel.id == PersonalACargoModel.medico_id).filter(PersonalMedicoModel.usuario_id == idmedico).all()
     resultado_json = []
     for item in PersonalesACargo:
         tabla_data = item[2].__dict__
@@ -66,5 +67,6 @@ def get_allPersonalAcargo(idmedico: int):
             key: value for key, value in tabla_data.items() if not key.startswith('_')
         })
 
+    print(resultado_json)
     # Retornar los resultados en formato JSON
     return resultado_json

@@ -31,13 +31,14 @@ def logeo(cedulausuario, passwordusuario):
     doctor = usuarioac.personalmedico
     familiar = usuarioac.familiardesignado
     paciente = usuarioac.paciente
-
-
+    
     if doctor:
-        rol.append("medico")
+        rol.append("doctor")
+
     if familiar:
         rol.append("familiar")
+
     if paciente:
         rol.append("paciente")
 
-    return {"auth": token, "rol":rol}
+    return {"auth": token, "rol":rol  }
