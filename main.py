@@ -19,6 +19,7 @@ Base.metadata.create_all(bind=engine)
 
 origins = [
     "http://localhost:5173",
+    "https://delightful-plant-0a1f3470f.3.azurestaticapps.net",
 ]
 
 app.add_middleware(
