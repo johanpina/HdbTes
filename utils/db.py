@@ -1,14 +1,42 @@
+from dotenv import load_dotenv
+import os
 import psycopg2
 import psycopg2.extras
 
+load_dotenv()  # take environment variables from .env.
+global parse_connection_string
+connection_string = os.getenv("AZURE_POSTGRESQL_CONNECTIONSTRING")
+
+
+import urllib.parse as urlparse
+
+def parse_connection_string(conn_str):
+    pair = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
+    conn_str_params = {pair.split('=')[0]: pair.split('=')[1] for pair in conn_str.split(' ')}
+    # Retorna un diccionario con los componentes de la cadena de conexión
+    return {
+        'dbname': conn_str_params['dbname'],
+        'user': conn_str_params['user'],
+        'password': conn_str_params['password'],
+        'host': conn_str_params['host'],
+        'port': conn_str_params['port']
+    }
+
+
+
 def DataBaseConnection():
     conn = None
+    
     try:
+        # Parsear la cadena de conexión
+        params = parse_connection_string(connection_string)
         conn = psycopg2.connect(
-                                            host="backendhospitalizacionencasa-server.postgres.database.azure.com",
-                                            database="backendhospitalizacionencasa-database",
-                                            user="uctdfmdutd",
-                                            password="C2V1D7334156E6WA$")
+                            host=params['host'],
+                            database=params['dbname'],
+                            user=params['user'],
+                            password=params['password'],
+                            port=params['port']
+                            )
 
         return conn
     except psycopg2.OperationalError as err:

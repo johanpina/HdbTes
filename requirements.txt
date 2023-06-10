@@ -1,11 +1,13 @@
 numpy
 fastapi[all]
 uvicorn
+psycopg2-binary
+gunicorn
 pydantic
 PyJWT
 cryptography
 SQLAlchemy
 reportlab
 requests
-psycopg2
-gunicorn
+python-dotenv
+
