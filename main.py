@@ -20,7 +20,8 @@ Base.metadata.create_all(bind=engine)
 origins = [
     "http://localhost:5173",
     "https://delightful-plant-0a1f3470f.3.azurestaticapps.net",
-    "https://190.165.114.93,
+    "https://190.165.114.93",
+    "https://backendhospitalizacionencasa.azurewebsites.net",
 ]
 
 app.add_middleware(
