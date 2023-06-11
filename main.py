@@ -11,11 +11,14 @@ from router.SignosVitales import signosVitales
 from router.HistorialSignoVital import historialSignosVital
 from router.PersonalACargo import personalAcargo
 from fastapi.middleware.cors import CORSMiddleware
-from utils.dbAlchemy import Base, engine
+from utils.dbAlchemy import engine
+from models.model import Base
+
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
